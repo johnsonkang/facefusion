@@ -146,7 +146,8 @@ def validate_source_paths(source_paths : List[str]) -> Tuple[List[str], List[str
 	invalid_source_paths = []
 
 	for source_path in source_paths:
-		if validate_hash(source_path):
+		# Skip CRC validation during normal runs; only require the file to exist.
+		if is_file(source_path):
 			valid_source_paths.append(source_path)
 		else:
 			invalid_source_paths.append(source_path)

@@ -9,6 +9,20 @@ def create_hash(content : bytes) -> str:
 	return format(zlib.crc32(content), '08x')
 
 
+def compute_crc32(file_path : str) -> Optional[str]:
+	"""
+	Calculate CRC32 for a given file. Used by the standalone validator script.
+	"""
+	if not is_file(file_path):
+		return None
+
+	crc = 0
+	with open(file_path, 'rb') as validate_file:
+		for chunk in iter(lambda: validate_file.read(1024 * 1024), b''):
+			crc = zlib.crc32(chunk, crc)
+	return format(crc & 0xffffffff, '08x')
+
+
 def validate_hash(validate_path : str) -> bool:
 	hash_path = get_hash_path(validate_path)
 
