@@ -132,6 +132,8 @@ def processors_pre_check() -> bool:
 
 
 def force_download() -> ErrorCode:
+	from facefusion import logger
+
 	common_modules =\
 	[
 		content_analyser,
@@ -144,6 +146,7 @@ def force_download() -> ErrorCode:
 	]
 	available_processors = [ get_file_name(file_path) for file_path in resolve_file_paths('facefusion/processors/modules') ]
 	processor_modules = get_processors_modules(available_processors)
+	failed_count = 0
 
 	for module in common_modules + processor_modules:
 		if hasattr(module, 'create_static_model_set'):
@@ -153,7 +156,11 @@ def force_download() -> ErrorCode:
 
 				if model_hash_set and model_source_set:
 					if not conditional_download_hashes(model_hash_set) or not conditional_download_sources(model_source_set):
-						return 1
+						failed_count += 1
+						logger.warn(f'Skipping model due to download/validation failure, continuing with other models...', __name__)
+
+	if failed_count > 0:
+		logger.warn(f'{failed_count} model(s) failed to download or validate, but other models were downloaded successfully.', __name__)
 
 	return 0
 
